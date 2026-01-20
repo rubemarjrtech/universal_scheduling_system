@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  cellphone String @unique
+}
+
+model Provider {
+  id Int @id @default(autoincrement())
+  name String
+  slug String
+  email String @unique
+  cellphone String @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  scheduleOptions ScheduleOptions[]
+}
+
+model ScheduleOptions {
+  id Int @id @default(autoincrement())
+  dayOfWeek Int
+  startTime Int
+  endTime Int
+  provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  provider_id Int
+}
+
+model Scheduling {
+  id String @id @default(uuid())
+  startsAt DateTime
+  endsAt DateTime
+  provider_id Int
+  customer_id Int
+}
