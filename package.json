@@ -7,7 +7,9 @@
     "start:gateway": "nest start api-gateway --watch",
     "start:sched": "nest start scheduling-service --watch",
     "build:sched": "nest build scheduling-service",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix",
+    "seed": "ts-node -r tsconfig-paths/register apps/scheduling-service/prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +24,8 @@
     "@nestjs/microservices": "^11.1.12",
     "@nestjs/platform-fastify": "^11.1.12",
     "@prisma/client": "5.22.0",
+    "date-fns-tz": "^3.2.0",
+    "redis": "^5.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

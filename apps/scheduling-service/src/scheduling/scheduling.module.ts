@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SchedulingService } from './scheduling.service';
 import { SchedulingController } from './scheduling.controller';
+import { DatabaseModule } from '../database/database.module';
+import { LockModule } from '../lock/lock.module';
+import { ScheduleOptionsModule } from '../schedule-options/schedule-options.module';
 
 @Module({
+  imports: [DatabaseModule, LockModule, ScheduleOptionsModule],
   providers: [SchedulingService],
   controllers: [SchedulingController],
 })

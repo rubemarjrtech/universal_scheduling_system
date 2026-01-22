@@ -30,14 +30,17 @@ model ScheduleOptions {
   dayOfWeek Int
   startTime Int
   endTime Int
-  provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  duration Int
+  provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   provider_id Int
 }
 
-model Scheduling {
+model Appointment {
   id String @id @default(uuid())
   startsAt DateTime
   endsAt DateTime
   provider_id Int
   customer_id Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
