@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { SchedulingModule } from './scheduling/scheduling.module';
-import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
+import { ProviderModule } from './service-provider/provider.module';
+import { ScheduleOptionsModule } from './schedule-options/schedule-options.module';
 
 @Module({
   imports: [
-    DatabaseModule,
     SchedulingModule,
+    ScheduleOptionsModule,
+    ProviderModule,
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: false,
     }),
   ],
 })

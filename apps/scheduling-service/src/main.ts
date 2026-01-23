@@ -1,17 +1,30 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { join } from 'path';
+import {
+  AsyncMicroserviceOptions,
+  GrpcOptions,
+  Transport,
+} from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
+import { SCHEDULING_PACKAGE } from '@app/common';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  const app = await NestFactory.createMicroservice<AsyncMicroserviceOptions>(
     AppModule,
     {
-      transport: Transport.GRPC,
-      options: {
-        package: 'scheduling',
-        protoPath: join(__dirname, '../../../libs/common/scheduling.proto'),
-        url: 'localhost:50051',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          transport: Transport.GRPC,
+          options: {
+            package: SCHEDULING_PACKAGE,
+            protoPath: 'libs/common/scheduling.proto',
+            url: configService.get<string>('SCHEDULING_CLIENT_URL'),
+            loader: {
+              keepCase: true,
+            },
+          },
+        } as GrpcOptions;
       },
     },
   );

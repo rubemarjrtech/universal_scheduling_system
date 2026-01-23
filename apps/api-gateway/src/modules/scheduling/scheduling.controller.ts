@@ -1,8 +1,8 @@
 import { Controller, Get, Inject, OnModuleInit, Param } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { SCHEDULING_PACKAGE, type SchedulingServiceRPC } from 'libs/src';
+import { SCHEDULING_PACKAGE, type SchedulingServiceRPC } from '@app/common';
 
-@Controller('appointment')
+@Controller('scheduling')
 export class SchedulingController implements OnModuleInit {
   private appointmentServiceRPC: SchedulingServiceRPC;
 
@@ -12,7 +12,7 @@ export class SchedulingController implements OnModuleInit {
 
   onModuleInit() {
     this.appointmentServiceRPC =
-      this.client.getService<SchedulingServiceRPC>('AppointmentService');
+      this.client.getService<SchedulingServiceRPC>('SchedulingService');
   }
 
   @Get('id')

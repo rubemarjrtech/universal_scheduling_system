@@ -15,7 +15,13 @@
       "entryFile": "main",
       "sourceRoot": "apps/api-gateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/api-gateway/tsconfig.build.json"
+        "tsConfigPath": "apps/api-gateway/tsconfig.build.json",
+        "assets": [
+          {
+            "include": "**/*.proto",
+            "outDir": "dist/apps/scheduling-service"
+          }
+        ]
       }
     },
     "scheduling-service": {

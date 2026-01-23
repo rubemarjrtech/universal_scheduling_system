@@ -1,26 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 import Availability from '../common/types/availability.type';
-import { ProviderAvailabilityDto } from '../scheduling/dtos/request/provider-availability.dto';
-import { PrismaClient } from '@prisma/client';
+import { ProviderAvailabilityDto } from '../../../../libs/common/src/dtos/provider-availability.dto';
 import { formatInTimeZone } from 'date-fns-tz';
 import formatLockStr from '../common/utils/format-lock-string';
 import { LockService } from '../lock/lock.service';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class ProviderService {
   constructor(
     private readonly scheduleOptions: ScheduleOptionsService,
-    private readonly prismaClient: PrismaClient,
+    private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
   ) {}
 
   async getAvailability(
     data: ProviderAvailabilityDto,
   ): Promise<Availability | null> {
+    const date = new Date(data.date);
     const availability = await this.scheduleOptions.findByProviderWeekday({
       provider_id: data.provider_id,
-      dayOfWeek: data.date.getDay(),
+      dayOfWeek: date.getDay(),
     });
 
     if (!availability) return null;
@@ -30,18 +31,18 @@ export class ProviderService {
         provider_id: data.provider_id,
         startsAt: {
           gte: new Date(
-            data.date.getFullYear(),
-            data.date.getMonth(),
-            data.date.getDate(),
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
             0,
             0,
             0,
             0,
           ),
           lte: new Date(
-            data.date.getFullYear(),
-            data.date.getMonth(),
-            data.date.getDate(),
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
             23,
             59,
             59,
@@ -50,14 +51,13 @@ export class ProviderService {
         },
       },
     });
-
+    // remove from availability if this schedule has been taken before
     for (const appointment of appointments) {
       const time = formatInTimeZone(
         appointment.startsAt,
         'America/Sao_Paulo',
         'HH:mm',
       );
-      // remove from availability if this schedule has been taken before
       if (availability.includes(time)) {
         const index = availability.findIndex((value) => value === time);
         if (index > -1) {
@@ -70,7 +70,7 @@ export class ProviderService {
       const result = await this.lockService.get(
         formatLockStr(data.provider_id, value),
       );
-      if (result) {
+      if (typeof result === 'string') {
         availability.splice(index, 1);
       }
     });

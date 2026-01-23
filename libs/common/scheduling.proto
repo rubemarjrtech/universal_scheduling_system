@@ -14,3 +14,16 @@ message Scheduling {
     int32 id = 1;
     string time = 2;
 }
+
+service ProviderService {
+    rpc getAvailability(ProviderAvailability) returns (Availability);
+}
+
+message ProviderAvailability {
+    int32 provider_id = 1;
+    string date = 2;
+}
+
+message Availability {
+    repeated string availability = 1;
+}

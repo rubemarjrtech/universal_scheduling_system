@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ProviderAvailabilityDto } from './dtos/request/provider-availability.dto';
+import { ProviderAvailabilityDto } from '@app/common';
 import Appointment from './types/appointment.type';
 import { DatabaseService } from '../database/database.service';
 
