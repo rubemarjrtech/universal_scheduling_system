@@ -11,4 +11,12 @@ export class LockService {
   async get(key: string): Promise<string | {}> {
     return this.client.get(key);
   }
+
+  async set(key: string, customer_id: number): Promise<boolean> {
+    const result = await this.client.set(key, `${customer_id}`, {
+      condition: 'NX',
+      expiration: { type: 'EX', value: 300 },
+    });
+    return result === 'OK';
+  }
 }

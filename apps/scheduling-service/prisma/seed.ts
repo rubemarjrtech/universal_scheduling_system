@@ -5,14 +5,15 @@ const prisma = new PrismaClient();
 async function cleanDatabase() {
   await prisma.scheduleOptions.deleteMany({});
   await prisma.provider.deleteMany({});
+  await prisma.customer.deleteMany({});
 }
 
 async function main() {
   await cleanDatabase();
   const provider = await prisma.provider.create({
     data: {
-      email: 'test@email.com',
-      name: 'test',
+      email: 'test_provider@email.com',
+      name: 'test_provider',
       cellphone: '+000000000000',
       slug: 'Electricity',
     },
@@ -28,6 +29,13 @@ async function main() {
           id: provider.id,
         },
       },
+    },
+  });
+  await prisma.customer.create({
+    data: {
+      email: 'test_customer@email.com',
+      name: 'test_customer',
+      cellphone: '+000000000000',
     },
   });
 }

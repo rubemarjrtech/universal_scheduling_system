@@ -12,6 +12,7 @@ model Customer {
   name String
   email String @unique
   cellphone String @unique
+  appointment Appointment[]
 }
 
 model Provider {
@@ -23,6 +24,7 @@ model Provider {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   scheduleOptions ScheduleOptions[]
+  appointment Appointment[]
 }
 
 model ScheduleOptions {
@@ -39,7 +41,9 @@ model Appointment {
   id String @id @default(uuid())
   startsAt DateTime
   endsAt DateTime
+  provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   provider_id Int
+  customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
   customer_id Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

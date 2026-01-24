@@ -6,11 +6,13 @@ import { formatInTimeZone } from 'date-fns-tz';
 import formatLockStr from '../common/utils/format-lock-string';
 import { LockService } from '../lock/lock.service';
 import { DatabaseService } from '../database/database.service';
+import { ProviderLockSlotDto } from '@app/common';
+import { addDays, getDay, parseISO, startOfDay } from 'date-fns';
 
 @Injectable()
 export class ProviderService {
   constructor(
-    private readonly scheduleOptions: ScheduleOptionsService,
+    private readonly scheduleOptionsService: ScheduleOptionsService,
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
   ) {}
@@ -18,46 +20,34 @@ export class ProviderService {
   async getAvailability(
     data: ProviderAvailabilityDto,
   ): Promise<Availability | null> {
-    const date = new Date(data.date);
-    const availability = await this.scheduleOptions.findByProviderWeekday({
-      provider_id: data.provider_id,
-      dayOfWeek: date.getDay(),
-    });
+    const referenceDate = new Date(data.date);
+    const timezone = 'America/Sao_Paulo';
+    const formatted = formatInTimeZone(referenceDate, timezone, 'yyyy-MM-dd');
+    const dateObj = parseISO(formatted);
+    const day = getDay(dateObj);
+    const availability =
+      await this.scheduleOptionsService.findByProviderWeekday({
+        provider_id: data.provider_id,
+        dayOfWeek: day,
+      });
 
     if (!availability) return null;
 
+    // JOGAR ESSA LÓGICA PARA O SCHEDULING SERVICE
+    const dayStart = startOfDay(dateObj);
+    const dayEnd = addDays(dayStart, 1);
     const appointments = await this.prismaClient.appointment.findMany({
       where: {
         provider_id: data.provider_id,
         startsAt: {
-          gte: new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            0,
-            0,
-            0,
-            0,
-          ),
-          lte: new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            23,
-            59,
-            59,
-            0,
-          ),
+          gte: dayStart,
+          lt: dayEnd,
         },
       },
     });
-    // remove from availability if this schedule has been taken before
+    // TESTAR ESSA LÓGICA DEPOIS DE IMPLEMENTAR CRIAÇÃO DE APPOINTMENTS
     for (const appointment of appointments) {
-      const time = formatInTimeZone(
-        appointment.startsAt,
-        'America/Sao_Paulo',
-        'HH:mm',
-      );
+      const time = formatInTimeZone(appointment.startsAt, timezone, 'HH:mm');
       if (availability.includes(time)) {
         const index = availability.findIndex((value) => value === time);
         if (index > -1) {
@@ -66,15 +56,36 @@ export class ProviderService {
       }
     }
 
-    availability.forEach(async (value, index) => {
-      const result = await this.lockService.get(
-        formatLockStr(data.provider_id, value),
-      );
-      if (typeof result === 'string') {
-        availability.splice(index, 1);
-      }
+    const checkPromises = availability.map(async (value) => {
+      const key = formatLockStr({
+        provider_id: data.provider_id,
+        date: referenceDate,
+        customer_id: data.customer_id,
+        hour: value,
+      });
+      const result = await this.lockService.get(key);
+      return typeof result === 'string';
     });
+    const result = await Promise.all(checkPromises);
+    const availableSlots = availability.filter((_, index) => !result[index]);
 
-    return availability;
+    return availableSlots;
+  }
+
+  async lockSlot(data: ProviderLockSlotDto) {
+    const result = await this.lockService.set(
+      formatLockStr({
+        provider_id: data.provider_id,
+        date: data.date,
+        customer_id: data.customer_id,
+      }),
+      data.customer_id,
+    );
+
+    if (!result) {
+      return { success: false };
+    }
+
+    return { success: true };
   }
 }

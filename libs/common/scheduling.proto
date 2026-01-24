@@ -17,13 +17,25 @@ message Scheduling {
 
 service ProviderService {
     rpc getAvailability(ProviderAvailability) returns (Availability);
+    rpc lockSlot(LockOptions) returns (LockMessage);
 }
 
 message ProviderAvailability {
     int32 provider_id = 1;
     string date = 2;
+    int32 customer_id = 3;
 }
 
 message Availability {
     repeated string availability = 1;
+}
+
+message LockOptions {
+    int32 provider_id = 1;
+    string date = 2;
+    int32 customer_id = 3;
+}
+
+message LockMessage {
+    bool success = 1;
 }
