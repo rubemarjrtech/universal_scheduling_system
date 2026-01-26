@@ -1,19 +1,6 @@
 syntax = "proto3";
 
-package scheduling;
-
-service SchedulingService {
-    rpc FindOne(SchedulingById) returns (Scheduling);
-}
-
-message SchedulingById {
-    int32 id = 1;
-}
-
-message Scheduling {
-    int32 id = 1;
-    string time = 2;
-}
+package scheduling.provider;
 
 service ProviderService {
     rpc getAvailability(ProviderAvailability) returns (Availability);

@@ -9,5 +9,6 @@ import { ScheduleOptionsModule } from '../schedule-options/schedule-options.modu
   imports: [DatabaseModule, LockModule, ScheduleOptionsModule],
   providers: [SchedulingService],
   controllers: [SchedulingController],
+  exports: [SchedulingService],
 })
 export class SchedulingModule {}

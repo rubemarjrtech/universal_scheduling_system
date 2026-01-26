@@ -11,7 +11,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import {
   PROVIDER_SERVICE,
   ProviderLockSlotDto,
-  SCHEDULING_PACKAGE,
+  SCHEDULING_CLIENT,
   type ProviderServiceRPC,
 } from '@app/common';
 
@@ -19,9 +19,7 @@ import {
 export class ProviderController implements OnModuleInit {
   private providerServiceRPC: ProviderServiceRPC;
 
-  constructor(
-    @Inject(SCHEDULING_PACKAGE) private readonly client: ClientGrpc,
-  ) {}
+  constructor(@Inject(SCHEDULING_CLIENT) private readonly client: ClientGrpc) {}
 
   onModuleInit() {
     this.providerServiceRPC =

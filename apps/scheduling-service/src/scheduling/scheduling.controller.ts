@@ -1,13 +1,19 @@
 import { Controller } from '@nestjs/common';
 import { SchedulingService } from './scheduling.service';
 import { GrpcMethod } from '@nestjs/microservices';
+import { CreateAppointmentDto, SCHEDULING_SERVICE } from '@app/common';
 
 @Controller()
 export class SchedulingController {
-  constructor(private readonly SchedulingModuleService: SchedulingService) {}
+  constructor(private readonly schedulingService: SchedulingService) {}
 
-  @GrpcMethod('SchedulingService', 'FindOne')
+  @GrpcMethod(SCHEDULING_SERVICE, 'create')
+  async create(data: CreateAppointmentDto) {
+    return this.schedulingService.create(data);
+  }
+
+  @GrpcMethod(SCHEDULING_SERVICE, 'FindOne')
   findOne(data: { id: number }) {
-    return this.SchedulingModuleService.findOne(data);
+    return this.schedulingService.findOne(data);
   }
 }

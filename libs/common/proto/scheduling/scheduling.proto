@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package scheduling.scheduling;
+
+service SchedulingService {
+    rpc create(CreateAppointment) returns (CreateAppointmentMessage);
+}
+
+message CreateAppointment {
+    string startsAt = 1;
+    string endsAt = 2;
+    int32 provider_id = 3;
+    int32 customer_id = 4;
+}
+
+message CreateAppointmentMessage {
+    string id = 1;
+    string startsAt = 2;
+    string endsAt = 3;
+    int32 provider_id = 4;
+    int32 customer_id = 5;
+    string created_at = 6;
+    string updated_at = 7;
+}

@@ -6,7 +6,10 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { SCHEDULING_PACKAGE } from '@app/common';
+import {
+  SCHEDULING_PROVIDER_PACKAGE,
+  SCHEDULING_SCHEDULING_PACKAGE,
+} from '@app/common';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<AsyncMicroserviceOptions>(
@@ -17,8 +20,14 @@ async function bootstrap() {
         return {
           transport: Transport.GRPC,
           options: {
-            package: SCHEDULING_PACKAGE,
-            protoPath: 'libs/common/scheduling.proto',
+            package: [
+              SCHEDULING_SCHEDULING_PACKAGE,
+              SCHEDULING_PROVIDER_PACKAGE,
+            ],
+            protoPath: [
+              'libs/common/proto/scheduling/scheduling.proto',
+              'libs/common/proto/scheduling/provider.proto',
+            ],
             url: configService.get<string>('SCHEDULING_CLIENT_URL'),
             loader: {
               keepCase: true,

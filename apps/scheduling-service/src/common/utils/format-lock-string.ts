@@ -1,7 +1,7 @@
 import { ProviderLockSlotDto } from '@app/common';
 import { formatInTimeZone } from 'date-fns-tz';
 
-function formatLockStr(data: ProviderLockSlotDto): string {
+function formatLockKey(data: ProviderLockSlotDto): string {
   if (typeof data.date === 'object' && data.hour) {
     const localDate = formatInTimeZone(
       data.date,
@@ -25,4 +25,4 @@ function formatLockStr(data: ProviderLockSlotDto): string {
   return `lock:${data.provider_id}:${localDate}T${localTime}:${data.customer_id}`;
 }
 
-export default formatLockStr;
+export default formatLockKey;

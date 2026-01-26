@@ -15,9 +15,7 @@ export class ProviderController {
   async getAvailability(data: ProviderAvailabilityDto) {
     const availability = await this.providerService.getAvailability(data);
 
-    if (!availability) return { availability: [] };
-
-    return { availability: availability };
+    return { availability: availability || [] };
   }
 
   @GrpcMethod(PROVIDER_SERVICE, 'lockSlot')
