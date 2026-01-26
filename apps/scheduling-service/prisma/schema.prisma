@@ -39,8 +39,8 @@ model ScheduleOptions {
 
 model Appointment {
   id String @id @default(uuid())
-  startsAt DateTime
-  endsAt DateTime
+  startsAt DateTime @unique
+  endsAt DateTime @unique
   provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   provider_id Int
   customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)

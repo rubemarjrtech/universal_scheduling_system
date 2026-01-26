@@ -5,11 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LockService } from './lock.service';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: 'apps/scheduling-service/.env',
-    }),
-  ],
   providers: [
     {
       provide: LOCK_PROVIDER_TOKEN,

@@ -1,6 +1,6 @@
 export class ProviderLockSlotDto {
   provider_id: number;
-  date: Date | string;
+  date: Date;
   customer_id: number;
-  hour?: string;
+  time?: string;
 }

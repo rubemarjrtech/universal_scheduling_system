@@ -45,6 +45,7 @@ import { GrpcToHttpInterceptor } from './common/interceptors/grpc-exception.inte
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: 'apps/api-gateway/.env',
     }),
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: GrpcToHttpInterceptor }],

@@ -5,6 +5,8 @@ import { ProviderModule } from './service-provider/provider.module';
 import { ScheduleOptionsModule } from './schedule-options/schedule-options.module';
 import { APP_FILTER } from '@nestjs/core';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { SocketModule } from './socket/socket.module';
+import { LockModule } from './lock/lock.module';
 
 @Module({
   imports: [
@@ -12,8 +14,11 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
     ScheduleOptionsModule,
     ProviderModule,
     ConfigModule.forRoot({
-      isGlobal: false,
+      isGlobal: true,
+      envFilePath: 'apps/scheduling-service/.env',
     }),
+    SocketModule,
+    LockModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: PrismaExceptionFilter }],
 })

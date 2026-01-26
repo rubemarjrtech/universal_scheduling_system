@@ -10,6 +10,7 @@ import { addDays, getDay, parseISO, startOfDay } from 'date-fns';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { SchedulingService } from '../scheduling/scheduling.service';
+import { LockGateway } from '../socket/lock.gateway';
 
 @Injectable()
 export class ProviderService {
@@ -18,6 +19,7 @@ export class ProviderService {
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
     private readonly schedulingService: SchedulingService,
+    private readonly lockGateway: LockGateway,
   ) {}
 
   async getAvailability(
@@ -57,7 +59,7 @@ export class ProviderService {
         provider_id: data.provider_id,
         date: referenceDate,
         customer_id: data.customer_id,
-        hour: value,
+        time: value,
       });
       const result = await this.lockService.get(key);
       return typeof result === 'string';
@@ -85,6 +87,7 @@ export class ProviderService {
       });
     }
 
+    this.lockGateway.notifySlotLock(data.date.toISOString());
     return { success: true };
   }
 
