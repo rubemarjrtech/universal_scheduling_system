@@ -9,8 +9,8 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   cors: {
     origin: (requestOrigin, callback) => {
-      const whitelist = process.env.SOCKET_ORIGIN;
-      if (!requestOrigin || whitelist.includes(requestOrigin)) {
+      const allowedOrigin = process.env.SOCKET_ORIGIN;
+      if (allowedOrigin === requestOrigin) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'), false);
@@ -31,6 +31,10 @@ export class LockGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   notifySlotLock(date: string) {
-    this.server.emit('lock', date);
+    this.server.emit('locked', date);
+  }
+
+  notifySlotBooked(date: string) {
+    this.server.emit('booked', date);
   }
 }

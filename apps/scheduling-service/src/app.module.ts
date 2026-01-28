@@ -15,7 +15,7 @@ import { LockModule } from './lock/lock.module';
     ProviderModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'apps/scheduling-service/.env',
+      envFilePath: ['apps/scheduling-service/.env', 'apps/api-gateway/.env'],
     }),
     SocketModule,
     LockModule,

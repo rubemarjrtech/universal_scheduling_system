@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 import Availability from '../common/types/availability.type';
-import { formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
 import formatLockKey from '../common/utils/format-lock-string';
 import { LockService } from '../lock/lock.service';
 import { DatabaseService } from '../database/database.service';
 import { ProviderAvailabilityDto, ProviderLockSlotDto } from '@app/common';
-import { addDays, getDay, parseISO, startOfDay } from 'date-fns';
+import { addDays, format, getDay, parseISO, startOfDay } from 'date-fns';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { SchedulingService } from '../scheduling/scheduling.service';
@@ -26,24 +26,29 @@ export class ProviderService {
     data: ProviderAvailabilityDto,
   ): Promise<Availability | null> {
     await this.checkIfProviderCustomerExist(data.provider_id, data.customer_id);
-    const referenceDate = new Date(data.date);
+    // date always come as UTC, so convert to desired timezone
     const timezone = 'America/Sao_Paulo';
-    const formatted = formatInTimeZone(referenceDate, timezone, 'yyyy-MM-dd');
-    const dateObj = parseISO(formatted);
+    const localDateStr = formatInTimeZone(data.date, timezone, 'yyyy-MM-dd');
+    const localDateObj = parseISO(localDateStr);
     const availability =
       await this.scheduleOptionsService.findByProviderWeekday({
         provider_id: data.provider_id,
-        dayOfWeek: getDay(dateObj),
+        dayOfWeek: getDay(localDateObj),
       });
 
     if (!availability) return null;
 
-    const dayStart = startOfDay(dateObj);
-    const dayEnd = addDays(dayStart, 1);
+    // convert start of day local to UTC time because database is always UTC, you can log startUtc and endUtc to visualize better
+    const startLocalString = `${localDateStr} 00:00:00`;
+    const nextDayDate = addDays(localDateObj, 1);
+    const nextDayString = format(nextDayDate, 'yyyy-MM-dd');
+    const endLocalString = `${nextDayString} 00:00:00`;
+    const startUtc = fromZonedTime(startLocalString, timezone);
+    const endUtc = fromZonedTime(endLocalString, timezone);
     const appointments = await this.schedulingService.findManyByProvider({
       provider_id: data.provider_id,
-      startsAt: dayStart,
-      endsAt: dayEnd,
+      startsAt: startUtc,
+      endsAt: endUtc,
     });
 
     for (const appointment of appointments) {
@@ -57,8 +62,7 @@ export class ProviderService {
     const checkPromises = availability.map(async (value) => {
       const key = formatLockKey({
         provider_id: data.provider_id,
-        date: referenceDate,
-        customer_id: data.customer_id,
+        date: data.date,
         time: value,
       });
       const result = await this.lockService.get(key);
@@ -75,7 +79,6 @@ export class ProviderService {
       formatLockKey({
         provider_id: data.provider_id,
         date: data.date,
-        customer_id: data.customer_id,
       }),
       data.customer_id,
     );
@@ -87,7 +90,7 @@ export class ProviderService {
       });
     }
 
-    this.lockGateway.notifySlotLock(data.date.toISOString());
+    this.lockGateway.notifySlotLock(data.date);
     return { success: true };
   }
 

@@ -11,6 +11,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import {
   CreateAppointmentDto,
   SCHEDULING_CLIENT,
+  SCHEDULING_SERVICE,
   type SchedulingServiceRPC,
 } from '@app/common';
 
@@ -22,7 +23,7 @@ export class SchedulingController implements OnModuleInit {
 
   onModuleInit() {
     this.appointmentServiceRPC =
-      this.client.getService<SchedulingServiceRPC>('SchedulingService');
+      this.client.getService<SchedulingServiceRPC>(SCHEDULING_SERVICE);
   }
 
   @Post()

@@ -4,9 +4,10 @@ import { SchedulingController } from './scheduling.controller';
 import { DatabaseModule } from '../database/database.module';
 import { LockModule } from '../lock/lock.module';
 import { ScheduleOptionsModule } from '../schedule-options/schedule-options.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
-  imports: [DatabaseModule, LockModule, ScheduleOptionsModule],
+  imports: [DatabaseModule, LockModule, ScheduleOptionsModule, SocketModule],
   providers: [SchedulingService],
   controllers: [SchedulingController],
   exports: [SchedulingService],

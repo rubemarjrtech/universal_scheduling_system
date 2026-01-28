@@ -1,5 +1,5 @@
 export class ProviderAvailabilityDto {
   provider_id: number;
-  date: Date | string;
+  date: string;
   customer_id: number;
 }

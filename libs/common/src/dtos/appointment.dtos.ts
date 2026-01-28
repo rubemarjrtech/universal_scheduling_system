@@ -1,6 +1,6 @@
 export interface CreateAppointmentDto {
-  startsAt: Date;
-  endsAt: Date;
+  startsAt: string;
+  endsAt: string;
   customer_id: number;
   provider_id: number;
 }
