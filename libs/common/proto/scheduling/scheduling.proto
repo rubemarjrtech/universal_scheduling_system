@@ -3,7 +3,9 @@ syntax = "proto3";
 package scheduling.scheduling;
 
 service SchedulingService {
-    rpc create(CreateAppointment) returns (CreateAppointmentMessage);
+    rpc create(CreateAppointment) returns (DefaultResponse);
+    rpc findManyByProvider(FindAppointmentByProvider) returns (DefaultResponseList);
+    rpc findManyByCustomer(FindAppointmentByCustomer) returns (DefaultResponseList);
 }
 
 message CreateAppointment {
@@ -13,7 +15,19 @@ message CreateAppointment {
     int32 customer_id = 4;
 }
 
-message CreateAppointmentMessage {
+message FindAppointmentByProvider {
+    string startsAt = 1;
+    string endsAt = 2;
+    int32 provider_id = 3;
+}
+
+message FindAppointmentByCustomer {
+    string startsAt = 1;
+    string endsAt = 2;
+    int32 customer_id = 3;
+}
+
+message DefaultResponse {
     string id = 1;
     string startsAt = 2;
     string endsAt = 3;
@@ -21,4 +35,8 @@ message CreateAppointmentMessage {
     int32 customer_id = 5;
     string created_at = 6;
     string updated_at = 7;
+}
+
+message DefaultResponseList {
+    repeated DefaultResponse data = 1;
 }

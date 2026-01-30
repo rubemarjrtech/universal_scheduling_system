@@ -35,6 +35,8 @@ model ScheduleOptions {
   duration Int
   provider Provider @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   provider_id Int
+
+  @@unique([provider_id, dayOfWeek])
 }
 
 model Appointment {

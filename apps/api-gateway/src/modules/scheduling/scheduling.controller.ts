@@ -6,6 +6,7 @@ import {
   OnModuleInit,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
@@ -27,8 +28,30 @@ export class SchedulingController implements OnModuleInit {
   }
 
   @Post()
-  async create(@Body() data: CreateAppointmentDto) {
+  create(@Body() data: CreateAppointmentDto) {
     return this.appointmentServiceRPC.create(data);
+  }
+
+  @Get('provider')
+  async findManyByProvider(
+    @Query('provider_id') provider_id: string,
+    @Query('startsAt') startsAt: string,
+  ) {
+    return this.appointmentServiceRPC.findManyByProvider({
+      provider_id: +provider_id,
+      startsAt,
+    });
+  }
+
+  @Get('customer')
+  async findManyByCustomer(
+    @Query('customer_id') customer_id: string,
+    @Query('startsAt') startsAt: string,
+  ) {
+    return this.appointmentServiceRPC.findManyByCustomer({
+      customer_id: +customer_id,
+      startsAt,
+    });
   }
 
   @Get('id')

@@ -1,33 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import ScheduleOptions from './types/schedule-options.type';
-import Availability from '../common/types/availability.type';
-import availableTime from '../common/utils/available-time';
 import { DatabaseService } from '../database/database.service';
+import {
+  CreateSchedOptionsDto,
+  findByProviderWeekdayDto,
+  SchedOptionsResponseDto,
+} from '@app/common';
 
 @Injectable()
 export class ScheduleOptionsService {
   constructor(private readonly prismaClient: DatabaseService) {}
 
-  async findByProviderWeekday(
-    data: Pick<ScheduleOptions, 'provider_id' | 'dayOfWeek'>,
-  ): Promise<Availability | null> {
-    const scheduleOptions = await this.prismaClient.scheduleOptions.findFirst({
-      where: {
+  async create(data: CreateSchedOptionsDto): Promise<SchedOptionsResponseDto> {
+    return this.prismaClient.scheduleOptions.create({
+      data: {
+        startTime: data.startTime,
+        endTime: data.endTime,
+        duration: data.duration,
         dayOfWeek: data.dayOfWeek,
-        provider_id: data.provider_id,
+        provider: {
+          connect: {
+            id: data.provider_id,
+          },
+        },
       },
     });
+  }
 
-    if (!scheduleOptions) return null;
-
-    const schedule: Availability = [];
-    let time = scheduleOptions.startTime;
-
-    while (time < scheduleOptions.endTime) {
-      schedule.push(availableTime[time]);
-      time += scheduleOptions.duration;
-    }
-
-    return schedule;
+  async findByProviderWeekday(
+    data: findByProviderWeekdayDto,
+  ): Promise<SchedOptionsResponseDto | null> {
+    return this.prismaClient.scheduleOptions.findUnique({
+      where: {
+        provider_id_dayOfWeek: {
+          dayOfWeek: data.dayOfWeek,
+          provider_id: data.provider_id,
+        },
+      },
+    });
   }
 }

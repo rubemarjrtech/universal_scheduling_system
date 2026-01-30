@@ -1,16 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 import Availability from '../common/types/availability.type';
-import { formatInTimeZone, fromZonedTime } from 'date-fns-tz';
+import { formatInTimeZone } from 'date-fns-tz';
 import formatLockKey from '../common/utils/format-lock-string';
 import { LockService } from '../lock/lock.service';
 import { DatabaseService } from '../database/database.service';
-import { ProviderAvailabilityDto, ProviderLockSlotDto } from '@app/common';
-import { addDays, format, getDay, parseISO, startOfDay } from 'date-fns';
+import {
+  ProviderAvailabilityDto,
+  ProviderLockSlotDto,
+  SchedOptionsResponseDto,
+} from '@app/common';
+import { getDay, parseISO } from 'date-fns';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { SchedulingService } from '../scheduling/scheduling.service';
 import { LockGateway } from '../socket/lock.gateway';
+import availableTime from '../common/utils/available-time';
 
 @Injectable()
 export class ProviderService {
@@ -30,27 +35,19 @@ export class ProviderService {
     const timezone = 'America/Sao_Paulo';
     const localDateStr = formatInTimeZone(data.date, timezone, 'yyyy-MM-dd');
     const localDateObj = parseISO(localDateStr);
-    const availability =
+    const scheduleOptions =
       await this.scheduleOptionsService.findByProviderWeekday({
         provider_id: data.provider_id,
         dayOfWeek: getDay(localDateObj),
       });
 
-    if (!availability) return null;
+    if (!scheduleOptions) return null;
 
-    // convert start of day local to UTC time because database is always UTC, you can log startUtc and endUtc to visualize better
-    const startLocalString = `${localDateStr} 00:00:00`;
-    const nextDayDate = addDays(localDateObj, 1);
-    const nextDayString = format(nextDayDate, 'yyyy-MM-dd');
-    const endLocalString = `${nextDayString} 00:00:00`;
-    const startUtc = fromZonedTime(startLocalString, timezone);
-    const endUtc = fromZonedTime(endLocalString, timezone);
+    const availability = this.calculateAvailability(scheduleOptions);
     const appointments = await this.schedulingService.findManyByProvider({
       provider_id: data.provider_id,
-      startsAt: startUtc,
-      endsAt: endUtc,
+      startsAt: data.date,
     });
-
     for (const appointment of appointments) {
       const time = formatInTimeZone(appointment.startsAt, timezone, 'HH:mm');
       const index = availability.findIndex((value) => value === time);
@@ -59,18 +56,7 @@ export class ProviderService {
       }
     }
 
-    const checkPromises = availability.map(async (value) => {
-      const key = formatLockKey({
-        provider_id: data.provider_id,
-        date: data.date,
-        time: value,
-      });
-      const result = await this.lockService.get(key);
-      return typeof result === 'string';
-    });
-    const result = await Promise.all(checkPromises);
-    const availableSlots = availability.filter((_, index) => !result[index]);
-    return availableSlots;
+    return this.filterAvailableSlots(availability, data.provider_id, data.date);
   }
 
   async lockSlot(data: ProviderLockSlotDto) {
@@ -117,5 +103,38 @@ export class ProviderService {
         message: 'Customer or Provider not found',
       });
     }
+  }
+
+  private async filterAvailableSlots(
+    availability: Availability,
+    provider_id: number,
+    date: string,
+  ): Promise<Availability> {
+    const checkPromises = availability.map(async (value) => {
+      const key = formatLockKey({
+        provider_id: provider_id,
+        date,
+        time: value,
+      });
+      const result = await this.lockService.get(key);
+      return typeof result === 'string';
+    });
+    const result = await Promise.all(checkPromises);
+    const availableSlots = availability.filter((_, index) => !result[index]);
+    return availableSlots;
+  }
+
+  private calculateAvailability(
+    scheduleOptions: SchedOptionsResponseDto,
+  ): Availability {
+    const schedule: Availability = [];
+    let time = scheduleOptions.startTime;
+
+    while (time < scheduleOptions.endTime) {
+      schedule.push(availableTime[time]);
+      time += scheduleOptions.duration;
+    }
+
+    return schedule;
   }
 }

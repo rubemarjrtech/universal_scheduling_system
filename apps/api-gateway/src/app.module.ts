@@ -4,12 +4,14 @@ import { ClientsModule, GrpcOptions, Transport } from '@nestjs/microservices';
 import {
   SCHEDULING_CLIENT,
   SCHEDULING_PROVIDER_PACKAGE,
+  SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
   SCHEDULING_SCHEDULING_PACKAGE,
 } from '@app/common';
 import { SchedulingController } from './modules/scheduling/scheduling.controller';
 import { ProviderController } from './modules/service-provider/provider.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { GrpcToHttpInterceptor } from './common/interceptors/grpc-exception.interceptor';
+import { GrpcExceptionInterceptor } from './common/interceptors/grpc-exception.interceptor';
+import { ScheduleOptionsController } from './modules/schedule-options/schedule-options.controller';
 
 @Module({
   imports: [
@@ -25,10 +27,12 @@ import { GrpcToHttpInterceptor } from './common/interceptors/grpc-exception.inte
                 package: [
                   SCHEDULING_SCHEDULING_PACKAGE,
                   SCHEDULING_PROVIDER_PACKAGE,
+                  SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
                 ],
                 protoPath: [
                   'libs/common/proto/scheduling/scheduling.proto',
                   'libs/common/proto/scheduling/provider.proto',
+                  'libs/common/proto/scheduling/schedule-options.proto',
                 ],
                 url: configService.get<string>('SCHEDULING_CLIENT_URL'),
                 loader: {
@@ -48,7 +52,11 @@ import { GrpcToHttpInterceptor } from './common/interceptors/grpc-exception.inte
       envFilePath: 'apps/api-gateway/.env',
     }),
   ],
-  providers: [{ provide: APP_INTERCEPTOR, useClass: GrpcToHttpInterceptor }],
-  controllers: [SchedulingController, ProviderController],
+  providers: [{ provide: APP_INTERCEPTOR, useClass: GrpcExceptionInterceptor }],
+  controllers: [
+    SchedulingController,
+    ProviderController,
+    ScheduleOptionsController,
+  ],
 })
 export class AppModule {}

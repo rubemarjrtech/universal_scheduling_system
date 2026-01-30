@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import {
   SCHEDULING_PROVIDER_PACKAGE,
+  SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
   SCHEDULING_SCHEDULING_PACKAGE,
 } from '@app/common';
 
@@ -23,10 +24,12 @@ async function bootstrap() {
             package: [
               SCHEDULING_SCHEDULING_PACKAGE,
               SCHEDULING_PROVIDER_PACKAGE,
+              SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
             ],
             protoPath: [
               'libs/common/proto/scheduling/scheduling.proto',
               'libs/common/proto/scheduling/provider.proto',
+              'libs/common/proto/scheduling/schedule-options.proto',
             ],
             url: configService.get<string>('SCHEDULING_CLIENT_URL'),
             loader: {
