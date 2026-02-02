@@ -1,0 +1,1 @@
+export const LOCK_PROVIDER_TOKEN = 'REDIS_CLIENT';

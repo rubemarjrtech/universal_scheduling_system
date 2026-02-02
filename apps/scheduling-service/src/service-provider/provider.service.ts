@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 import Availability from '../common/types/availability.type';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -8,13 +8,13 @@ import { DatabaseService } from '../database/database.service';
 import {
   ProviderAvailabilityDto,
   ProviderLockSlotDto,
+  REDIS_PUB_SUB_TOKEN,
   SchedOptionsResponseDto,
 } from '@app/common';
 import { getDay, parseISO } from 'date-fns';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { SchedulingService } from '../scheduling/scheduling.service';
-import { LockGateway } from '../socket/lock.gateway';
 import availableTime from '../common/utils/available-time';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class ProviderService {
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
     private readonly schedulingService: SchedulingService,
-    private readonly lockGateway: LockGateway,
+    @Inject(REDIS_PUB_SUB_TOKEN) private readonly pubSubClient: ClientProxy,
   ) {}
 
   async getAvailability(
@@ -76,7 +76,10 @@ export class ProviderService {
       });
     }
 
-    this.lockGateway.notifySlotLock(data.date);
+    this.pubSubClient.emit('slot_locked', {
+      date: data.date,
+      provider_id: data.provider_id,
+    });
     return { success: true };
   }
 

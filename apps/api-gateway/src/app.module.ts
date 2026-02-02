@@ -12,6 +12,7 @@ import { ProviderController } from './modules/service-provider/provider.controll
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GrpcExceptionInterceptor } from './common/interceptors/grpc-exception.interceptor';
 import { ScheduleOptionsController } from './modules/schedule-options/schedule-options.controller';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -49,8 +50,9 @@ import { ScheduleOptionsController } from './modules/schedule-options/schedule-o
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'apps/api-gateway/.env',
+      envFilePath: ['apps/api-gateway/.env'],
     }),
+    SocketModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: GrpcExceptionInterceptor }],
   controllers: [

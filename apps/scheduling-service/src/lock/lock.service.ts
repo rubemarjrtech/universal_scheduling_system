@@ -1,5 +1,5 @@
+import { LOCK_PROVIDER_TOKEN } from '@app/common';
 import { Inject, Injectable } from '@nestjs/common';
-import LOCK_PROVIDER_TOKEN from '../common/tokens/lock-provider.token';
 import { RedisClientType } from 'redis';
 
 @Injectable()

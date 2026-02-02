@@ -1,35 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   CreateAppointmentDto,
   SchedulingResponseDto,
   ProviderAvailabilityDto,
   FindCustomerSchedulingDto,
   FindProviderSchedulingDto,
+  REDIS_PUB_SUB_TOKEN,
 } from '@app/common';
 import { DatabaseService } from '../database/database.service';
 import { LockService } from '../lock/lock.service';
 import formatLockKey from '../common/utils/format-lock-string';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { LockGateway } from '../socket/lock.gateway';
 import getUtcDayStartEnd from '../common/utils/get-utc-day-start-end';
+import { addMinutes } from 'date-fns';
+import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 
 @Injectable()
 export class SchedulingService {
   constructor(
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
-    private readonly lockGateway: LockGateway,
+    @Inject(REDIS_PUB_SUB_TOKEN) private readonly pubSubClient: ClientProxy,
+    private readonly scheduleOptionsService: ScheduleOptionsService,
   ) {}
 
   async create(data: CreateAppointmentDto): Promise<SchedulingResponseDto> {
+    await this.checkIfProviderCustomerExist(data.provider_id, data.customer_id);
     const key = formatLockKey({
       date: data.startsAt,
       provider_id: data.provider_id,
     });
     const customerIdStr = String(data.customer_id);
     const result = await this.lockService.get(key);
-
     if (typeof result === 'string' && result !== customerIdStr) {
       throw new RpcException({
         code: status.ALREADY_EXISTS,
@@ -37,25 +40,29 @@ export class SchedulingService {
       });
     }
 
+    const scheduleOptions = await this.scheduleOptionsService.findByProvider(
+      data.provider_id,
+    );
+    const endsAt = this.calculateEndsAt(
+      new Date(data.startsAt),
+      scheduleOptions.duration,
+    );
     const appointment = await this.prismaClient.appointment.create({
       data: {
         startsAt: data.startsAt,
-        endsAt: data.endsAt,
-        provider: {
-          connect: {
-            id: data.provider_id,
-          },
-        },
-        customer: {
-          connect: {
-            id: data.customer_id,
-          },
-        },
+        endsAt,
+        provider_id: data.provider_id,
+        customer_id: data.customer_id,
       },
     });
 
     await this.lockService.release(key, customerIdStr);
-    this.lockGateway.notifySlotBooked(data.startsAt);
+    this.pubSubClient.emit('slot_booked', {
+      date: data.startsAt,
+      provider_id: data.provider_id,
+      customer_id: data.customer_id,
+      appointmentId: appointment.id,
+    });
 
     return {
       ...appointment,
@@ -129,5 +136,34 @@ export class SchedulingService {
   findOne(data: { id: number }): boolean {
     console.log(data);
     return true;
+  }
+
+  private async checkIfProviderCustomerExist(
+    provider_id: number,
+    customer_id: number,
+  ): Promise<void> {
+    const [providerCount, customerCount] = await Promise.all([
+      this.prismaClient.provider.count({
+        where: {
+          id: provider_id,
+        },
+      }),
+      this.prismaClient.customer.count({
+        where: {
+          id: customer_id,
+        },
+      }),
+    ]);
+
+    if (!providerCount || !customerCount) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Customer or Provider not found',
+      });
+    }
+  }
+
+  private calculateEndsAt(startsAt: Date, amount: number): string {
+    return addMinutes(startsAt, amount).toISOString();
   }
 }

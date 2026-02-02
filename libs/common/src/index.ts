@@ -8,3 +8,4 @@ export const PROVIDER_SERVICE = 'ProviderService';
 export const SCHEDULE_OPTIONS_SERVICE = 'ScheduleOptionsService';
 export * from './types/';
 export * from './dtos/';
+export * from './tokens/';

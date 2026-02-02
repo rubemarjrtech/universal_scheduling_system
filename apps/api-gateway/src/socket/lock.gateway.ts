@@ -30,11 +30,13 @@ export class LockGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client: ${client.id} disconnected `);
   }
 
-  notifySlotLock(date: string) {
-    this.server.emit('locked', date);
+  notifySlotLock(data: any) {
+    console.log('notifying about lock');
+    this.server.emit('locked', data);
+    console.log('notified lock');
   }
 
-  notifySlotBooked(date: string) {
-    this.server.emit('booked', date);
+  notifySlotBooked(data: any) {
+    this.server.emit('booked', data);
   }
 }

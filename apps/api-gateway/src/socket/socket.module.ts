@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { LockGateway } from './lock.gateway';
 import { createClient } from 'redis';
 import { ConfigService } from '@nestjs/config';
-import { LockService } from './lock.service';
 import { LOCK_PROVIDER_TOKEN } from '@app/common';
+import { EventsController } from './events.controller';
 
 @Module({
   providers: [
@@ -15,8 +16,9 @@ import { LOCK_PROVIDER_TOKEN } from '@app/common';
       },
       inject: [ConfigService],
     },
-    LockService,
+    LockGateway,
   ],
-  exports: [LockService],
+  controllers: [EventsController],
+  exports: [LockGateway],
 })
-export class LockModule {}
+export class SocketModule {}

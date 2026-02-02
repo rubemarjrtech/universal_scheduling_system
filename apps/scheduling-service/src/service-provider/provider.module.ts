@@ -5,7 +5,6 @@ import { ScheduleOptionsModule } from '../schedule-options/schedule-options.modu
 import { DatabaseModule } from '../database/database.module';
 import { LockModule } from '../lock/lock.module';
 import { SchedulingModule } from '../scheduling/scheduling.module';
-import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
@@ -13,7 +12,6 @@ import { SocketModule } from '../socket/socket.module';
     ScheduleOptionsModule,
     LockModule,
     SchedulingModule,
-    SocketModule,
   ],
   controllers: [ProviderController],
   providers: [ProviderService],

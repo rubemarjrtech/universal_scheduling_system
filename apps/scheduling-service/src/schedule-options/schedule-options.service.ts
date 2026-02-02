@@ -38,4 +38,12 @@ export class ScheduleOptionsService {
       },
     });
   }
+
+  async findByProvider(provider_id: number) {
+    return this.prismaClient.scheduleOptions.findFirst({
+      where: {
+        provider_id,
+      },
+    });
+  }
 }

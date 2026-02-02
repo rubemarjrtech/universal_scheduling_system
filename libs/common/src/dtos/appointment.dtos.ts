@@ -1,8 +1,7 @@
 export interface CreateAppointmentDto {
   startsAt: string;
-  endsAt: string;
-  customer_id: number;
   provider_id: number;
+  customer_id: number;
 }
 
 export class SchedulingResponseDto {

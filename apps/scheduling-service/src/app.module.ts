@@ -5,19 +5,19 @@ import { ProviderModule } from './service-provider/provider.module';
 import { ScheduleOptionsModule } from './schedule-options/schedule-options.module';
 import { APP_FILTER } from '@nestjs/core';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
-import { SocketModule } from './socket/socket.module';
 import { LockModule } from './lock/lock.module';
+import { PubSubModule } from './pub-sub/pub-sub.module';
 
 @Module({
   imports: [
-    SchedulingModule,
-    ScheduleOptionsModule,
-    ProviderModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['apps/scheduling-service/.env', 'apps/api-gateway/.env'],
     }),
-    SocketModule,
+    PubSubModule,
+    SchedulingModule,
+    ScheduleOptionsModule,
+    ProviderModule,
     LockModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: PrismaExceptionFilter }],
