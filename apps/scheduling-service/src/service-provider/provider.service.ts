@@ -14,7 +14,7 @@ import {
 import { getDay, parseISO } from 'date-fns';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { SchedulingService } from '../scheduling/scheduling.service';
+import { AppointmentService } from '../appointment/appointment.service';
 import availableTime from '../common/utils/available-time';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class ProviderService {
     private readonly scheduleOptionsService: ScheduleOptionsService,
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
-    private readonly schedulingService: SchedulingService,
+    private readonly schedulingService: AppointmentService,
     @Inject(REDIS_PUB_SUB_TOKEN) private readonly pubSubClient: ClientProxy,
   ) {}
 
@@ -115,7 +115,7 @@ export class ProviderService {
   ): Promise<Availability> {
     const checkPromises = availability.map(async (value) => {
       const key = formatLockKey({
-        provider_id: provider_id,
+        provider_id,
         date,
         time: value,
       });

@@ -13,18 +13,18 @@ import {
   CreateAppointmentDto,
   SCHEDULING_CLIENT,
   SCHEDULING_SERVICE,
-  type SchedulingServiceRPC,
+  type AppointmentServiceRPC,
 } from '@app/common';
 
-@Controller('scheduling')
-export class SchedulingController implements OnModuleInit {
-  private appointmentServiceRPC: SchedulingServiceRPC;
+@Controller('appointment')
+export class AppointmentController implements OnModuleInit {
+  private appointmentServiceRPC: AppointmentServiceRPC;
 
   constructor(@Inject(SCHEDULING_CLIENT) private readonly client: ClientGrpc) {}
 
   onModuleInit() {
     this.appointmentServiceRPC =
-      this.client.getService<SchedulingServiceRPC>(SCHEDULING_SERVICE);
+      this.client.getService<AppointmentServiceRPC>(SCHEDULING_SERVICE);
   }
 
   @Post()

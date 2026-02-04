@@ -1,16 +1,16 @@
 import { Controller } from '@nestjs/common';
-import { SchedulingService } from './scheduling.service';
+import { AppointmentService } from './appointment.service';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   CreateAppointmentDto,
-  FindCustomerSchedulingDto,
-  FindProviderSchedulingDto,
+  FindCustomerAppointmentDto,
+  FindProviderAppointmentDto,
   SCHEDULING_SERVICE,
 } from '@app/common';
 
 @Controller()
-export class SchedulingController {
-  constructor(private readonly schedulingService: SchedulingService) {}
+export class AppointmentController {
+  constructor(private readonly schedulingService: AppointmentService) {}
 
   @GrpcMethod(SCHEDULING_SERVICE, 'create')
   create(data: CreateAppointmentDto) {
@@ -23,7 +23,7 @@ export class SchedulingController {
   }
 
   @GrpcMethod(SCHEDULING_SERVICE, 'findManyByProvider')
-  async findManyByProvider(data: FindProviderSchedulingDto) {
+  async findManyByProvider(data: FindProviderAppointmentDto) {
     const appointments = await this.schedulingService.findManyByProvider(data);
 
     return {
@@ -32,7 +32,7 @@ export class SchedulingController {
   }
 
   @GrpcMethod(SCHEDULING_SERVICE, 'findManyByCustomer')
-  async findManyByCustomer(data: FindCustomerSchedulingDto) {
+  async findManyByCustomer(data: FindCustomerAppointmentDto) {
     const appointments = await this.schedulingService.findManyByCustomer(data);
 
     return {

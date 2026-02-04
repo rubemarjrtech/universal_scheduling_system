@@ -3,11 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, GrpcOptions, Transport } from '@nestjs/microservices';
 import {
   SCHEDULING_CLIENT,
-  SCHEDULING_PROVIDER_PACKAGE,
-  SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
-  SCHEDULING_SCHEDULING_PACKAGE,
+  PROVIDER_PACKAGE,
+  SCHEDULE_OPTIONS_PACKAGE,
+  APPOINTMENT_PACKAGE,
 } from '@app/common';
-import { SchedulingController } from './modules/scheduling/scheduling.controller';
+import { AppointmentController } from './modules/appointment/scheduling.controller';
 import { ProviderController } from './modules/service-provider/provider.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GrpcExceptionInterceptor } from './common/interceptors/grpc-exception.interceptor';
@@ -26,16 +26,16 @@ import { SocketModule } from './socket/socket.module';
               transport: Transport.GRPC,
               options: {
                 package: [
-                  SCHEDULING_SCHEDULING_PACKAGE,
-                  SCHEDULING_PROVIDER_PACKAGE,
-                  SCHEDULING_SCHEDULE_OPTIONS_PACKAGE,
+                  APPOINTMENT_PACKAGE,
+                  PROVIDER_PACKAGE,
+                  SCHEDULE_OPTIONS_PACKAGE,
                 ],
                 protoPath: [
-                  'libs/common/proto/scheduling/scheduling.proto',
+                  'libs/common/proto/scheduling/appointment.proto',
                   'libs/common/proto/scheduling/provider.proto',
                   'libs/common/proto/scheduling/schedule-options.proto',
                 ],
-                url: configService.get<string>('SCHEDULING_CLIENT_URL'),
+                url: configService.get<string>('APPOINTMENT_CLIENT_URL'),
                 loader: {
                   keepCase: true,
                   defaults: true,
@@ -56,7 +56,7 @@ import { SocketModule } from './socket/socket.module';
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: GrpcExceptionInterceptor }],
   controllers: [
-    SchedulingController,
+    AppointmentController,
     ProviderController,
     ScheduleOptionsController,
   ],

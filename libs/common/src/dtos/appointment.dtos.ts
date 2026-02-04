@@ -4,7 +4,7 @@ export interface CreateAppointmentDto {
   customer_id: number;
 }
 
-export class SchedulingResponseDto {
+export class AppointmentResponseDto {
   id: string;
   customer_id: number;
   provider_id: number;
@@ -14,11 +14,11 @@ export class SchedulingResponseDto {
   endsAt: string;
 }
 
-export class FindProviderSchedulingDto {
+export class FindProviderAppointmentDto {
   provider_id: number;
   startsAt: string;
 }
-export class FindCustomerSchedulingDto {
+export class FindCustomerAppointmentDto {
   customer_id: number;
   startsAt: string;
 }

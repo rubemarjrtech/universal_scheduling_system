@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package scheduling.scheduling;
+package scheduling.appointment;
 
 service SchedulingService {
     rpc create(CreateAppointment) returns (DefaultResponse);

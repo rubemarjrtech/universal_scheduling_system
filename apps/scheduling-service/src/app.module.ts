@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { SchedulingModule } from './scheduling/scheduling.module';
+import { AppointmentModule } from './appointment/appointment.module';
 import { ConfigModule } from '@nestjs/config';
 import { ProviderModule } from './service-provider/provider.module';
 import { ScheduleOptionsModule } from './schedule-options/schedule-options.module';
@@ -15,7 +15,7 @@ import { PubSubModule } from './pub-sub/pub-sub.module';
       envFilePath: ['apps/scheduling-service/.env', 'apps/api-gateway/.env'],
     }),
     PubSubModule,
-    SchedulingModule,
+    AppointmentModule,
     ScheduleOptionsModule,
     ProviderModule,
     LockModule,

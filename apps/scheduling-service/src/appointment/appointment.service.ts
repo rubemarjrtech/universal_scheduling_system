@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CreateAppointmentDto,
-  SchedulingResponseDto,
+  AppointmentResponseDto,
   ProviderAvailabilityDto,
-  FindCustomerSchedulingDto,
-  FindProviderSchedulingDto,
+  FindCustomerAppointmentDto,
+  FindProviderAppointmentDto,
   REDIS_PUB_SUB_TOKEN,
 } from '@app/common';
 import { DatabaseService } from '../database/database.service';
@@ -17,7 +17,7 @@ import { addMinutes } from 'date-fns';
 import { ScheduleOptionsService } from '../schedule-options/schedule-options.service';
 
 @Injectable()
-export class SchedulingService {
+export class AppointmentService {
   constructor(
     private readonly prismaClient: DatabaseService,
     private readonly lockService: LockService,
@@ -25,7 +25,7 @@ export class SchedulingService {
     private readonly scheduleOptionsService: ScheduleOptionsService,
   ) {}
 
-  async create(data: CreateAppointmentDto): Promise<SchedulingResponseDto> {
+  async create(data: CreateAppointmentDto): Promise<AppointmentResponseDto> {
     await this.checkIfProviderCustomerExist(data.provider_id, data.customer_id);
     const key = formatLockKey({
       date: data.startsAt,
@@ -83,8 +83,8 @@ export class SchedulingService {
   }
 
   async findManyByProvider(
-    data: FindProviderSchedulingDto,
-  ): Promise<SchedulingResponseDto[]> {
+    data: FindProviderAppointmentDto,
+  ): Promise<AppointmentResponseDto[]> {
     // convert start of day local to UTC time because database is always UTC, you can log startUtc and endUtc to visualize better
     const { startUtc, endUtc } = getUtcDayStartEnd(data.startsAt);
     const appointments = await this.prismaClient.appointment.findMany({
@@ -109,8 +109,8 @@ export class SchedulingService {
   }
 
   async findManyByCustomer(
-    data: FindCustomerSchedulingDto,
-  ): Promise<SchedulingResponseDto[]> {
+    data: FindCustomerAppointmentDto,
+  ): Promise<AppointmentResponseDto[]> {
     const { startUtc, endUtc } = getUtcDayStartEnd(data.startsAt);
     const appointments = await this.prismaClient.appointment.findMany({
       where: {

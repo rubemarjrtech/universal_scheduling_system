@@ -40,7 +40,7 @@ export default [
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      'no-useless-constructor': 'on',
+      'no-useless-constructor': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -51,11 +51,12 @@ export default [
       ],
       '@typescript-eslint/ban-ts-comment': 'off',
       'no-useless-escape': 'off',
-      'no-useless-return': 'on',
+      'no-useless-return': 'warn',
       'accessor-pairs': 'off',
       'lines-between-class-members': 'off',
       'no-use-before-define': 'off',
       '@typescript-eslint/no-useless-constructor': 'off',
+      camelcase: 'off',
     },
   },
 ];
